@@ -89,6 +89,7 @@ type DriverParameters struct {
 	Bucket                      string
 	Region                      string
 	RegionEndpoint              string
+	ForcePathStyle              bool
 	Encrypt                     bool
 	KeyID                       string
 	Secure                      bool
@@ -186,6 +187,23 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 	regionEndpoint := parameters["regionendpoint"]
 	if regionEndpoint == nil {
 		regionEndpoint = ""
+	}
+
+	forcePathStyleBool := true
+	forcePathStyle := parameters["forcepathstyle"]
+	switch forcePathStyle := forcePathStyle.(type) {
+	case string:
+		b, err := strconv.ParseBool(forcePathStyle)
+		if err != nil {
+			return nil, fmt.Errorf("the forcePathStyle parameter should be a boolean")
+		}
+		forcePathStyleBool = b
+	case bool:
+		forcePathStyleBool = forcePathStyle
+	case nil:
+		// do nothing
+	default:
+		return nil, fmt.Errorf("the forcePathStyle parameter should be a boolean")
 	}
 
 	regionName := parameters["region"]
@@ -349,6 +367,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		fmt.Sprint(bucket),
 		region,
 		fmt.Sprint(regionEndpoint),
+		forcePathStyleBool,
 		encryptBool,
 		fmt.Sprint(keyID),
 		secureBool,
@@ -425,8 +444,8 @@ func New(params DriverParameters) (*Driver, error) {
 	})
 
 	if params.RegionEndpoint != "" {
-		awsConfig.WithS3ForcePathStyle(true)
 		awsConfig.WithEndpoint(params.RegionEndpoint)
+		awsConfig.WithS3ForcePathStyle(params.ForcePathStyle)
 	}
 
 	awsConfig.WithCredentials(creds)

@@ -37,6 +37,7 @@ func init() {
 	objectACL := os.Getenv("S3_OBJECT_ACL")
 	root, err := ioutil.TempDir("", "driver-")
 	regionEndpoint := os.Getenv("REGION_ENDPOINT")
+	forcePathStyle := os.Getenv("AWS_S3_FORCE_PATH_STYLE")
 	sessionToken := os.Getenv("AWS_SESSION_TOKEN")
 	if err != nil {
 		panic(err)
@@ -75,6 +76,13 @@ func init() {
 				return nil, err
 			}
 		}
+		forcePathStyleBool := true
+		if forcePathStyle != "" {
+			forcePathStyleBool, err = strconv.ParseBool(forcePathStyle)
+			if err != nil {
+				return nil, err
+			}
+		}
 
 		parameters := DriverParameters{
 			accessKey,
@@ -82,6 +90,7 @@ func init() {
 			bucket,
 			region,
 			regionEndpoint,
+			forcePathStyleBool,
 			encryptBool,
 			keyID,
 			secureBool,
