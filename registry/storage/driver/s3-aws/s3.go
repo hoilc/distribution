@@ -189,7 +189,7 @@ func FromParameters(parameters map[string]interface{}) (*Driver, error) {
 		regionEndpoint = ""
 	}
 
-	forcePathStyleBool := true
+	forcePathStyleBool := false
 	forcePathStyle := parameters["forcepathstyle"]
 	switch forcePathStyle := forcePathStyle.(type) {
 	case string:
@@ -445,9 +445,9 @@ func New(params DriverParameters) (*Driver, error) {
 
 	if params.RegionEndpoint != "" {
 		awsConfig.WithEndpoint(params.RegionEndpoint)
-		awsConfig.WithS3ForcePathStyle(params.ForcePathStyle)
 	}
 
+        awsConfig.WithS3ForcePathStyle(params.ForcePathStyle)
 	awsConfig.WithCredentials(creds)
 	awsConfig.WithRegion(params.Region)
 	awsConfig.WithDisableSSL(!params.Secure)
